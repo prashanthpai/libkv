@@ -61,9 +61,21 @@ func New(addrs []string, options *store.Config) (store.Store, error) {
 	)
 
 	entries = store.CreateEndpoints(addrs, "http")
+
+	// For every new instance of the etcd client, use a different
+	// transport altogether.
+	var transport etcd.CancelableTransport = &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		Dial: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).Dial,
+		TLSHandshakeTimeout: 10 * time.Second,
+	}
+
 	cfg := &etcd.Config{
 		Endpoints:               entries,
-		Transport:               etcd.DefaultTransport,
+		Transport:               transport,
 		HeaderTimeoutPerRequest: 3 * time.Second,
 	}
 
