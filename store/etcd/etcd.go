@@ -71,6 +71,7 @@ func New(addrs []string, options *store.Config) (store.Store, error) {
 			KeepAlive: 30 * time.Second,
 		}).Dial,
 		TLSHandshakeTimeout: 10 * time.Second,
+		DisableKeepAlives:   true,
 	}
 
 	cfg := &etcd.Config{
